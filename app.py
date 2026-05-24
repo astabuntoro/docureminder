@@ -431,6 +431,11 @@ if __name__ == '__main__':
         db.create_all()
     app.run(debug=True, port=5000)
 
-# Auto-create tables on startup (works with gunicorn too)
+# Auto-create tables on startup
+import logging
 with app.app_context():
-    db.create_all()
+    try:
+        db.create_all()
+        logging.info("DB tables created OK")
+    except Exception as e:
+        logging.error(f"DB create_all failed: {e}")
