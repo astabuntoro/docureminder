@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block title %} — Tambah Dokumen{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1>Tambah Dokumen</h1>
+    <p>Daftarkan dokumen baru</p>
+  </div>
+  <a href="{{ url_for('index') }}" class="btn btn-outline">← Kembali</a>
+</div>
+
+<div class="card" style="max-width:640px;">
+  <div class="card-header"><h2>Informasi Dokumen</h2></div>
+  <div class="card-body">
+    <form method="POST" enctype="multipart/form-data">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label">Nama Dokumen <span>*</span></label>
+          <input type="text" name="name" required placeholder="cth: SIM A Budi, Paspor Keluarga">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipe <span>*</span></label>
+          <select name="doc_type" required>
+            {% for t in doc_types %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">No. Dokumen</label>
+          <input type="text" name="doc_number" placeholder="Nomor identifikasi dokumen">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pemilik</label>
+          <input type="text" name="owner" placeholder="Nama pemilik">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tanggal Terbit</label>
+          <input type="date" name="issued_date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Berlaku s/d <span>*</span></label>
+          <input type="date" name="expiry_date" required>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Catatan</label>
+          <textarea name="notes" placeholder="Tempat perpanjangan, biaya, informasi lainnya…"></textarea>
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label">Upload Foto / Scan</label>
+          <div id="drop-zone" style="
+            border: 1px dashed var(--border-md);
+            border-radius: 4px; padding: 28px;
+            text-align: center; cursor: pointer;
+            transition: border-color .15s, background .15s;
+          " onclick="document.getElementById('fileInput').click()">
+            <input type="file" name="doc_files" id="fileInput" accept="image/*" multiple style="display:none">
+            <p style="font-size:11px;color:var(--ink-3);line-height:1.6;">
+              Klik atau seret file ke sini<br>
+              <span style="color:var(--ink-4);font-size:10px;">PNG, JPG, WEBP — bisa lebih dari satu</span>
+            </p>
+          </div>
+          <div id="preview-area" style="display:none;margin-top:12px;">
+            <div id="preview-grid" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider">
+      <div style="display:flex;gap:8px;">
+        <button type="submit" class="btn btn-primary">Simpan Dokumen</button>
+        <a href="{{ url_for('index') }}" class="btn btn-outline">Batal</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+#drop-zone:hover, #drop-zone.drag { border-color: var(--ink); background: var(--bg); }
+.prev-thumb {
+  position: relative; width: 80px; height: 80px;
+  border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
+}
+.prev-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+.prev-thumb button {
+  position: absolute; top: 3px; right: 3px;
+  background: rgba(0,0,0,.6); color: #fff;
+  border: none; border-radius: 2px;
+  width: 18px; height: 18px; font-size: 10px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+</style>
+<script>
+const zone = document.getElementById('drop-zone');
+const inp  = document.getElementById('fileInput');
+const area = document.getElementById('preview-area');
+const grid = document.getElementById('preview-grid');
+let files  = [];
+
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag'); addFiles([...e.dataTransfer.files]); });
+inp.addEventListener('change', () => addFiles([...inp.files]));
+
+function addFiles(list) {
+  list.filter(f => f.type.startsWith('image/')).forEach(f => { files.push(f); renderThumb(f, files.length - 1); });
+  sync(); if (files.length) area.style.display = 'block';
+}
+function renderThumb(f, i) {
+  const r = new FileReader(); r.onload = e => {
+    const d = document.createElement('div'); d.className = 'prev-thumb'; d.dataset.i = i;
+    d.innerHTML = `<img src="${e.target.result}"><button type="button" onclick="remove(${i})">✕</button>`;
+    grid.appendChild(d);
+  }; r.readAsDataURL(f);
+}
+function remove(i) { files[i] = null; grid.querySelector(`[data-i="${i}"]`)?.remove(); sync(); if (!files.filter(Boolean).length) area.style.display='none'; }
+function sync() { const dt = new DataTransfer(); files.filter(Boolean).forEach(f => dt.items.add(f)); inp.files = dt.files; }
+</script>
+{% endblock %}

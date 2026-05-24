@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Finlandica+Text:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>DocuReminder — {% if mode=='login' %}Masuk{% else %}Daftar{% endif %}</title>
+  
+  
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ink:    #111111;
+      --ink-2:  #444444;
+      --ink-3:  #888888;
+      --ink-4:  #bbbbbb;
+      --border: #e8e8e8;
+      --bg:     #fafafa;
+      --font-body: 'Finlandica Text', sans-serif;
+      --font-serif: 'Finlandica Text', sans-serif; /* kept for compat */
+    }
+    html { font-size: 14px; }
+    body {
+      font-family: 'Finlandica Text', sans-serif;
+      min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Left */
+    .left {
+      background: var(--ink);
+      display: flex; flex-direction: column;
+      padding: 40px 48px;
+      position: relative; overflow: hidden;
+    }
+    .left::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent, transparent 47px,
+        rgba(255,255,255,.03) 47px, rgba(255,255,255,.03) 48px
+      );
+      pointer-events: none;
+    }
+    .left-top { font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
+      text-decoration: none;
+      font-family: 'Finlandica Text', sans-serif; font-size: 16px; color: #fff;
+    }
+    .left-dot { width: 5px; height: 5px; border-radius: 50%; background: #fff; }
+    .left-body {
+      flex: 1; display: flex; flex-direction: column;
+      justify-content: center; max-width: 340px;
+    }
+    .left-body h2 {
+      font-family: 'Finlandica Text', sans-serif;
+      font-size: clamp(28px, 3vw, 42px);
+      font-weight: 400; line-height: 1.1;
+      color: #fff; letter-spacing: -.3px;
+      margin-bottom: 16px;
+    }
+    .left-body h2 em { font-style: italic; opacity: .6; }
+    .left-body p { font-size: 12px; color: rgba(255,255,255,.4); line-height: 1.7; }
+    .perks { margin-top: 32px; display: flex; flex-direction: column; gap: 10px; }
+    .perk { display: flex; align-items: center; gap: 10px; font-size: 11px; color: rgba(255,255,255,.5); }
+    .perk-line { width: 20px; height: 1px; background: rgba(255,255,255,.25); flex-shrink: 0; }
+    .left-foot { font-size: 10px; color: rgba(255,255,255,.2); letter-spacing: .5px; }
+
+    /* Right */
+    .right {
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      padding: 48px 10vw;
+    }
+    .form-box { width: 100%; max-width: 360px; }
+    .form-box h1 {
+      font-family: 'Finlandica Text', sans-serif;
+      font-size: 28px; font-weight: 400;
+      letter-spacing: -.2px; color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .form-box .sub { font-size: 11px; color: var(--ink-3); margin-bottom: 28px; letter-spacing: .2px; }
+
+    .field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
+    .field label {
+      font-size: 9px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 1px;
+      color: var(--ink-3);
+    }
+    input[type=text], input[type=email], input[type=password] {
+      padding: 9px 12px;
+      border: 1px solid var(--border); border-radius: 3px;
+      font-family: 'Finlandica Text', sans-serif; font-size: 12px;
+      color: var(--ink); background: #fff;
+      transition: border-color .12s;
+    }
+    input:focus { outline: none; border-color: var(--ink); }
+
+    .btn-submit {
+      width: 100%; padding: 11px;
+      background: var(--ink); color: #fff;
+      border: none; border-radius: 3px;
+      font-family: 'Finlandica Text', sans-serif; font-size: 12px; font-weight: 500;
+      letter-spacing: .3px; cursor: pointer;
+      transition: opacity .12s; margin-top: 6px;
+    }
+    .btn-submit:hover { opacity: .8; }
+
+    hr { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
+
+    .switch { text-align: center; font-size: 11px; color: var(--ink-3); }
+    .switch a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+
+    .remember { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--ink-3); margin-bottom: 4px; }
+    .remember input { width: 14px; height: 14px; accent-color: var(--ink); }
+
+    .alert { padding: 10px 12px; border-radius: 3px; font-size: 11px; margin-bottom: 14px; line-height: 1.5; }
+    .alert-danger  { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+    .alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+    .alert-info    { background: #f0f9ff; border: 1px solid #bae6fd; color: #0c4a6e; }
+
+    @media (max-width: 700px) {
+      body { grid-template-columns: 1fr; }
+      .left { display: none; }
+      .right { padding: 40px 6vw; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="left">
+  <a class="left-top" href="{{ url_for('landing') }}">
+    DocuReminder <span class="left-dot"></span>
+  </a>
+  <div class="left-body">
+    <h2>Semua dokumen penting, <em>satu tempat.</em></h2>
+    <p>Tidak ada lagi dokumen kedaluwarsa tanpa sepengetahuan Anda.</p>
+    <div class="perks">
+      <div class="perk"><div class="perk-line"></div>Push notification otomatis</div>
+      <div class="perk"><div class="perk-line"></div>Email reminder via Gmail</div>
+      <div class="perk"><div class="perk-line"></div>Export dokumen ke PDF</div>
+      <div class="perk"><div class="perk-line"></div>Gratis selamanya</div>
+    </div>
+  </div>
+  <div class="left-foot">© 2025 DOCUREMINDER</div>
+</div>
+
+<div class="right">
+  <div class="form-box">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="alert alert-{{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    {% if mode == 'login' %}
+      <h1>Selamat datang.</h1>
+      <p class="sub">Masuk ke akun Anda.</p>
+      <form method="POST" action="{{ url_for('login') }}">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" name="email" required placeholder="kamu@email.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" name="password" required placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <div class="remember">
+          <input type="checkbox" name="remember" id="remember">
+          <label for="remember">Ingat saya</label>
+        </div>
+        <button class="btn-submit" type="submit">Masuk →</button>
+      </form>
+      <hr>
+      <div class="switch">Belum punya akun? <a href="{{ url_for('register') }}">Daftar gratis</a></div>
+
+    {% else %}
+      <h1>Buat akun.</h1>
+      <p class="sub">Gratis, tidak perlu kartu kredit.</p>
+      <form method="POST" action="{{ url_for('register') }}">
+        <div class="field">
+          <label>Nama Lengkap</label>
+          <input type="text" name="name" required placeholder="Budi Santoso" autocomplete="name">
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" name="email" required placeholder="kamu@email.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" name="password" required placeholder="Min. 8 karakter" minlength="8" autocomplete="new-password">
+        </div>
+        <button class="btn-submit" type="submit">Daftar →</button>
+      </form>
+      <hr>
+      <div class="switch">Sudah punya akun? <a href="{{ url_for('login') }}">Masuk</a></div>
+    {% endif %}
+  </div>
+</div>
+
+</body>
+</html>
