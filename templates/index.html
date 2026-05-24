@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block title %} — Dashboard{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1>Dokumen</h1>
+    <p>{{ today.strftime('%A, %d %B %Y') }}</p>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <a href="{{ url_for('export_pdf_all') }}" class="btn btn-outline">Export PDF</a>
+    <a href="{{ url_for('add') }}" class="btn btn-primary">+ Tambah</a>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat-card">
+    <div class="stat-val">{{ stats.total }}</div>
+    <div class="stat-label">Total</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-dot dot-active"></div>
+    <div class="stat-val">{{ stats.active }}</div>
+    <div class="stat-label">Aktif</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-dot dot-warning"></div>
+    <div class="stat-val">{{ stats.warning }}</div>
+    <div class="stat-label">Perhatian</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-dot dot-critical"></div>
+    <div class="stat-val">{{ stats.critical }}</div>
+    <div class="stat-label">Kritis</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-dot dot-expired"></div>
+    <div class="stat-val">{{ stats.expired }}</div>
+    <div class="stat-label">Kedaluwarsa</div>
+  </div>
+</div>
+
+<!-- Urgent alert -->
+{% if urgent %}
+<div class="alert alert-warn" style="margin-bottom:24px;">
+  <span>!</span>
+  <span>
+    <strong>{{ urgent|length }} dokumen</strong> perlu perhatian —
+    {% for d in urgent %}<strong>{{ d.name }}</strong>{% if not loop.last %}, {% endif %}{% endfor %}
+  </span>
+</div>
+{% endif %}
+
+<!-- Table -->
+<div class="card">
+  <div class="card-header">
+    <h2>Semua Dokumen</h2>
+    <span style="font-size:10px;color:var(--ink-3);letter-spacing:.5px;">{{ docs|length }} DOKUMEN</span>
+  </div>
+
+  {% if docs %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Nama</th>
+          <th>Tipe</th>
+          <th>Pemilik</th>
+          <th>Berlaku s/d</th>
+          <th>Sisa</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for doc in docs %}
+        <tr>
+          <td>
+            <div class="doc-name">{{ doc.name }}</div>
+            {% if doc.doc_number %}<div style="font-size:10px;color:var(--ink-3);margin-top:2px;">{{ doc.doc_number }}</div>{% endif %}
+          </td>
+          <td><span class="doc-type-tag">{{ doc.doc_type }}</span></td>
+          <td style="color:var(--ink-2);">{{ doc.person_name or '—' }}</td>
+          <td style="color:var(--ink-2);">{{ doc.expiry_date.strftime('%d %b %Y') }}</td>
+          <td>
+            <span class="days-num {{ doc.status }}">
+              {% if doc.days_left >= 0 %}{{ doc.days_left }}d{% else %}−{{ doc.days_left|abs }}d{% endif %}
+            </span>
+          </td>
+          <td>
+            <div class="status-cell">
+              <span class="status-dot dot-{{ doc.status }}"></span>
+              <span class="status-text">{{ doc.status_label }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="actions">
+              <a href="{{ url_for('edit', doc_id=doc.id) }}" class="btn btn-ghost btn-sm">Edit</a>
+              <a href="{{ url_for('export_pdf_single', doc_id=doc.id) }}" class="btn btn-ghost btn-sm">PDF</a>
+              <form method="POST" action="{{ url_for('delete', doc_id=doc.id) }}"
+                    onsubmit="return confirm('Hapus dokumen ini?')" style="display:inline;">
+                <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="padding:64px 24px;text-align:center;">
+    <p style="font-family:'Finlandica Text',sans-serif;font-size:20px;color:var(--ink-3);font-weight:400;margin-bottom:8px;font-style:italic;">Belum ada dokumen.</p>
+    <p style="font-size:11px;color:var(--ink-4);margin-bottom:20px;">Mulai tambahkan dokumen penting Anda.</p>
+    <a href="{{ url_for('add') }}" class="btn btn-primary">+ Tambah Dokumen</a>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

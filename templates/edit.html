@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block title %} — Edit{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h1>{{ doc.name }}</h1>
+    <p>{{ doc.doc_type }} · Edit dokumen</p>
+  </div>
+  <a href="{{ url_for('index') }}" class="btn btn-outline">← Kembali</a>
+</div>
+
+<div class="card" style="max-width:640px;">
+  <div class="card-header"><h2>Informasi Dokumen</h2></div>
+  <div class="card-body">
+    <form method="POST" enctype="multipart/form-data">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label">Nama Dokumen <span>*</span></label>
+          <input type="text" name="name" required value="{{ doc.name }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipe <span>*</span></label>
+          <select name="doc_type" required>
+            {% for t in doc_types %}
+            <option value="{{ t }}" {% if doc.doc_type==t %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">No. Dokumen</label>
+          <input type="text" name="doc_number" value="{{ doc.doc_number or '' }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pemilik</label>
+          <input type="text" name="owner" value="{{ doc.person_name or '' }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tanggal Terbit</label>
+          <input type="date" name="issued_date" value="{{ doc.issued_date.strftime('%Y-%m-%d') if doc.issued_date else '' }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Berlaku s/d <span>*</span></label>
+          <input type="date" name="expiry_date" required value="{{ doc.expiry_date.strftime('%Y-%m-%d') }}">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Catatan</label>
+          <textarea name="notes">{{ doc.notes or '' }}</textarea>
+        </div>
+
+        {% if doc.files %}
+        <div class="form-group full">
+          <label class="form-label">File Tersimpan</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;">
+            {% for fname in doc.files %}
+            {% set ext = fname.rsplit('.',1)[-1].lower() %}
+            <div style="position:relative;width:80px;">
+              {% if ext in ['jpg','jpeg','png','gif','webp'] %}
+              <img src="{{ get_upload_url(fname) }}"
+                   style="width:80px;height:80px;object-fit:cover;border:1px solid var(--border);border-radius:4px;display:block;">
+              {% else %}
+              <div style="width:80px;height:80px;border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:22px;">📄</div>
+              {% endif %}
+              <label style="
+                display:flex;align-items:center;gap:4px;
+                margin-top:4px;font-size:10px;color:var(--ink-3);
+                cursor:pointer;text-transform:none;letter-spacing:0;
+              ">
+                <input type="checkbox" name="delete_file" value="{{ fname }}" style="width:12px;height:12px;"> Hapus
+              </label>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="form-group full">
+          <label class="form-label">Tambah File Baru</label>
+          <div id="drop-zone" style="border:1px dashed var(--border-md);border-radius:4px;padding:24px;text-align:center;cursor:pointer;transition:all .15s;"
+               onclick="document.getElementById('fileInput').click()">
+            <input type="file" name="doc_files" id="fileInput" accept="image/*" multiple style="display:none">
+            <p style="font-size:11px;color:var(--ink-3);">Klik atau seret file ke sini</p>
+          </div>
+          <div id="preview-area" style="display:none;margin-top:10px;">
+            <div id="preview-grid" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+        <a href="{{ url_for('export_pdf_single', doc_id=doc.id) }}" class="btn btn-outline">Export PDF</a>
+        <form method="POST" action="{{ url_for('delete', doc_id=doc.id) }}"
+              onsubmit="return confirm('Hapus dokumen ini?')" style="margin-left:auto;">
+          <button type="submit" class="btn btn-danger">Hapus Dokumen</button>
+        </form>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+#drop-zone:hover,.drag{border-color:var(--ink)!important;background:var(--bg);}
+</style>
+<script>
+const zone=document.getElementById('drop-zone'),inp=document.getElementById('fileInput'),
+      area=document.getElementById('preview-area'),grid=document.getElementById('preview-grid');
+let files=[];
+zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag');});
+zone.addEventListener('dragleave',()=>zone.classList.remove('drag'));
+zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag');add([...e.dataTransfer.files]);});
+inp.addEventListener('change',()=>add([...inp.files]));
+function add(list){list.filter(f=>f.type.startsWith('image/')).forEach(f=>{files.push(f);thumb(f,files.length-1);});sync();if(files.length)area.style.display='block';}
+function thumb(f,i){const r=new FileReader();r.onload=e=>{const d=document.createElement('div');d.style.cssText='position:relative;width:80px;';d.dataset.i=i;d.innerHTML=`<img src="${e.target.result}" style="width:80px;height:80px;object-fit:cover;border:1px solid var(--border);border-radius:4px;display:block;"><button type="button" onclick="rm(${i})" style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:2px;width:18px;height:18px;font-size:10px;cursor:pointer;">✕</button>`;grid.appendChild(d);};r.readAsDataURL(f);}
+function rm(i){files[i]=null;grid.querySelector(`[data-i="${i}"]`)?.remove();sync();if(!files.filter(Boolean).length)area.style.display='none';}
+function sync(){const dt=new DataTransfer();files.filter(Boolean).forEach(f=>dt.items.add(f));inp.files=dt.files;}
+</script>
+{% endblock %}

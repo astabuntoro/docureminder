@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Finlandica+Text:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocuReminder</title>
+  
+  
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ink:   #111111;
+      --ink-2: #444444;
+      --ink-3: #888888;
+      --ink-4: #bbbbbb;
+      --bg:    #fafafa;
+      --white: #ffffff;
+      --border:#e8e8e8;
+      --font-body: 'Finlandica Text', sans-serif;
+      --font-serif: 'Finlandica Text', sans-serif; /* kept for compat */
+      --green: #22c55e;
+      --yellow:#f59e0b;
+      --red:   #ef4444;
+    }
+    html { font-size: 14px; scroll-behavior: smooth; }
+    body { font-family: 'Finlandica Text', sans-serif; background: var(--white); color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 6vw; height: 56px;
+    }
+    .nav-brand { font-weight: 700;
+      font-family: 'Finlandica Text', sans-serif;
+      font-size: 17px; letter-spacing: -.2px;
+      color: var(--ink); text-decoration: none;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .nav-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ink); }
+    .nav-links { display: flex; gap: 6px; align-items: center; }
+    .nav-link {
+      padding: 7px 14px; border-radius: 3px;
+      font-size: 12px; font-weight: 500; letter-spacing: .2px;
+      text-decoration: none; color: var(--ink-3);
+      transition: color .12s;
+    }
+    .nav-link:hover { color: var(--ink); }
+    .nav-cta {
+      padding: 7px 16px; border-radius: 3px;
+      background: var(--ink); color: var(--white);
+      font-size: 12px; font-weight: 500; text-decoration: none;
+      transition: opacity .12s;
+    }
+    .nav-cta:hover { opacity: .8; }
+
+    /* HERO */
+    .hero {
+      max-width: 1100px; margin: 0 auto;
+      padding: 80px 6vw 72px;
+      display: grid; grid-template-columns: 1.1fr 1fr;
+      gap: 64px; align-items: center;
+    }
+    .hero-eyebrow {
+      display: inline-block;
+      font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--ink-3); margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-family: 'Finlandica Text', sans-serif;
+      font-size: clamp(40px, 5.5vw, 68px);
+      font-weight: 400; line-height: 1.05;
+      letter-spacing: -.5px; color: var(--ink);
+      margin-bottom: 20px;
+    }
+    .hero h1 em { font-style: italic; }
+    .hero p {
+      font-size: 13px; line-height: 1.7;
+      color: var(--ink-3); margin-bottom: 36px;
+      max-width: 380px;
+    }
+    .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-hero-primary {
+      padding: 11px 24px; border-radius: 3px;
+      background: var(--ink); color: var(--white);
+      font-family: 'Finlandica Text', sans-serif; font-size: 12px; font-weight: 500;
+      text-decoration: none; letter-spacing: .3px;
+      transition: opacity .12s;
+    }
+    .btn-hero-primary:hover { opacity: .8; }
+    .btn-hero-sec {
+      padding: 11px 24px; border-radius: 3px;
+      border: 1px solid var(--border);
+      color: var(--ink-2);
+      font-family: 'Finlandica Text', sans-serif; font-size: 12px; font-weight: 500;
+      text-decoration: none; letter-spacing: .3px;
+      transition: border-color .12s, color .12s;
+    }
+    .btn-hero-sec:hover { border-color: var(--ink); color: var(--ink); }
+
+    /* App mock */
+    .app-mock {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 40px rgba(0,0,0,.06), 0 1px 0 rgba(0,0,0,.04);
+    }
+    .mock-bar {
+      padding: 10px 14px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .mock-circle { width: 9px; height: 9px; border-radius: 50%; }
+    .mock-title { font-size: 11px; color: var(--ink-3); margin-left: 8px; }
+    .mock-stats-row {
+      display: grid; grid-template-columns: repeat(5,1fr);
+      border-bottom: 1px solid var(--border);
+    }
+    .mock-stat {
+      padding: 14px 12px;
+      border-right: 1px solid var(--border);
+    }
+    .mock-stat:last-child { border-right: none; }
+    .mock-stat-num { font-family: 'Finlandica Text', sans-serif; font-size: 22px; color: var(--ink); }
+    .mock-stat-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .8px; color: var(--ink-4); margin-top: 2px; }
+    .mock-rows { padding: 0; }
+    .mock-row {
+      display: flex; align-items: center;
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--border);
+      gap: 10px;
+    }
+    .mock-row:last-child { border-bottom: none; }
+    .mock-rdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .mock-rname { font-size: 12px; color: var(--ink); flex: 1; }
+    .mock-rtag  { font-size: 9px; letter-spacing: .8px; text-transform: uppercase; color: var(--ink-3); }
+    .mock-rdays { font-size: 11px; color: var(--ink-3); }
+
+    /* Divider */
+    .section-divider {
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 6vw;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Features */
+    .features {
+      max-width: 1100px; margin: 0 auto;
+      padding: 72px 6vw;
+    }
+    .section-label {
+      font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--ink-3); margin-bottom: 12px;
+    }
+    .section-h2 {
+      font-family: 'Finlandica Text', sans-serif;
+      font-size: clamp(28px, 3.5vw, 44px);
+      font-weight: 400; letter-spacing: -.3px;
+      color: var(--ink); margin-bottom: 48px;
+    }
+    .features-grid {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 1px; background: var(--border);
+      border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+    }
+    .feat {
+      background: var(--white);
+      padding: 28px 24px;
+    }
+    .feat-num {
+      font-size: 10px; letter-spacing: 1px;
+      color: var(--ink-4); margin-bottom: 16px;
+    }
+    .feat h3 {
+      font-family: 'Finlandica Text', sans-serif;
+      font-size: 17px; font-weight: 400;
+      color: var(--ink); margin-bottom: 8px;
+    }
+    .feat p { font-size: 12px; color: var(--ink-3); line-height: 1.65; }
+
+    /* CTA */
+    .cta-section {
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 6vw 80px;
+    }
+    .cta-box {
+      background: var(--ink);
+      border-radius: 6px;
+      padding: 56px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 32px; flex-wrap: wrap;
+    }
+    .cta-box h2 {
+      font-family: 'Finlandica Text', sans-serif;
+      font-size: clamp(24px, 2.5vw, 36px);
+      font-weight: 400; color: var(--white);
+      letter-spacing: -.2px;
+    }
+    .cta-box p { font-size: 12px; color: rgba(255,255,255,.4); margin-top: 6px; }
+    .btn-cta-inv {
+      padding: 12px 28px; border-radius: 3px;
+      background: var(--white); color: var(--ink);
+      font-family: 'Finlandica Text', sans-serif; font-size: 12px; font-weight: 500;
+      text-decoration: none; white-space: nowrap;
+      transition: opacity .12s;
+    }
+    .btn-cta-inv:hover { opacity: .88; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 6vw;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 11px; color: var(--ink-4); flex-wrap: wrap; gap: 8px;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hero-left  { animation: fadeUp .5s ease both; }
+    .hero-right { animation: fadeUp .5s ease .1s both; }
+
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; gap: 40px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .mock-stats-row { grid-template-columns: repeat(3,1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="/landing">
+    DocuReminder<span class="nav-dot"></span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="{{ url_for('login') }}">Masuk</a>
+    <a class="nav-cta"  href="{{ url_for('register') }}">Daftar Gratis</a>
+  </div>
+</nav>
+
+<section style="max-width:1100px;margin:0 auto;">
+  <div class="hero">
+    <div class="hero-left">
+      <span class="hero-eyebrow">Manajemen Dokumen · Indonesia</span>
+      <h1>Tidak ada lagi dokumen yang <em>kedaluwarsa</em>.</h1>
+      <p>SIM, STNK, Paspor, Asuransi — satu tempat, pengingat otomatis, export PDF kapan saja.</p>
+      <div class="hero-actions">
+        <a href="{{ url_for('register') }}" class="btn-hero-primary">Mulai Gratis</a>
+        <a href="{{ url_for('login') }}" class="btn-hero-sec">Sudah punya akun</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="app-mock">
+        <div class="mock-bar">
+          <div class="mock-circle" style="background:#f87171;"></div>
+          <div class="mock-circle" style="background:#fbbf24;"></div>
+          <div class="mock-circle" style="background:#4ade80;"></div>
+          <span class="mock-title">DocuReminder — Dokumen</span>
+        </div>
+        <div class="mock-stats-row">
+          <div class="mock-stat"><div class="mock-stat-num">5</div><div class="mock-stat-lbl">Total</div></div>
+          <div class="mock-stat"><div class="mock-stat-num" style="color:var(--green);">3</div><div class="mock-stat-lbl">Aktif</div></div>
+          <div class="mock-stat"><div class="mock-stat-num" style="color:var(--yellow);">1</div><div class="mock-stat-lbl">Perhatian</div></div>
+          <div class="mock-stat"><div class="mock-stat-num" style="color:var(--red);">1</div><div class="mock-stat-lbl">Kritis</div></div>
+          <div class="mock-stat"><div class="mock-stat-num" style="color:#9ca3af;">0</div><div class="mock-stat-lbl">Expired</div></div>
+        </div>
+        <div class="mock-rows">
+          <div class="mock-row">
+            <div class="mock-rdot" style="background:var(--green);"></div>
+            <div><div class="mock-rname">SIM A</div><div class="mock-rtag">SIM</div></div>
+            <span class="mock-rdays">200 hari</span>
+          </div>
+          <div class="mock-row">
+            <div class="mock-rdot" style="background:var(--red);box-shadow:0 0 0 3px rgba(239,68,68,.15);"></div>
+            <div><div class="mock-rname">STNK Honda Jazz</div><div class="mock-rtag">STNK</div></div>
+            <span class="mock-rdays" style="color:var(--red);font-weight:500;">23 hari</span>
+          </div>
+          <div class="mock-row">
+            <div class="mock-rdot" style="background:var(--green);"></div>
+            <div><div class="mock-rname">Paspor RI</div><div class="mock-rtag">Paspor</div></div>
+            <span class="mock-rdays">300 hari</span>
+          </div>
+          <div class="mock-row">
+            <div class="mock-rdot" style="background:var(--yellow);"></div>
+            <div><div class="mock-rname">Asuransi Jiwa</div><div class="mock-rtag">Asuransi</div></div>
+            <span class="mock-rdays" style="color:var(--yellow);">65 hari</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<section class="features">
+  <div class="section-label">Fitur</div>
+  <h2 class="section-h2">Semua yang kamu butuhkan.</h2>
+  <div class="features-grid">
+    <div class="feat">
+      <div class="feat-num">01</div>
+      <h3>Simpan Dokumen</h3>
+      <p>SIM, STNK, Paspor, Asuransi, BPJS, dan lainnya. Upload foto atau scan untuk referensi.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-num">02</div>
+      <h3>Push Notification</h3>
+      <p>Notifikasi browser langsung, bahkan saat app ditutup. Atur threshold hari sesuai kebutuhan.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-num">03</div>
+      <h3>Email Reminder</h3>
+      <p>Reminder otomatis dikirim ke Gmail tiap hari. Tidak ada yang terlewat.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-num">04</div>
+      <h3>Export PDF</h3>
+      <p>Generate PDF rapi dengan foto dokumen. Export satu atau semua sekaligus.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-num">05</div>
+      <h3>Multi Akun</h3>
+      <p>Tiap anggota keluarga bisa punya akun sendiri. Data terisolasi dan aman.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-num">06</div>
+      <h3>Status Visual</h3>
+      <p>Dashboard dengan indikator warna — langsung tahu mana yang perlu perhatian.</p>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="cta-box">
+    <div>
+      <h2>Mulai sekarang.</h2>
+      <p>Gratis. Tidak perlu kartu kredit.</p>
+    </div>
+    <a href="{{ url_for('register') }}" class="btn-cta-inv">Daftar Gratis →</a>
+  </div>
+</section>
+
+<footer>
+  <span style="font-family:'Finlandica Text',sans-serif;font-size:14px;">DocuReminder</span>
+  <span>© 2025 · Semua dokumen penting, satu tempat.</span>
+</footer>
+
+</body>
+</html>
